@@ -25,6 +25,15 @@ class SimpleJob < ActiveRecord::Base
   end
 end
 
+class StandaloneJob < Struct.new :name
+  include JobGroup
+  job_group{ |standalone_job| standalone_job.name }  
+  
+  def perform
+    puts "running standalone job"
+  end
+end
+
 class User < ActiveRecord::Base
   job_group{ |user| user.role }  
   def send_welcome_email
@@ -43,6 +52,16 @@ describe Delayed::Job do
   context "a job" do
     before do
       Delayed::Job.enqueue GroupedJob.new(:repository => "repo1")
+    end
+    
+    it "should have a job group" do
+      Delayed::Job.first.lock_group.should == "repo1"
+    end
+  end
+  
+  context "a standalone job" do
+    before do
+      Delayed::Job.enqueue StandaloneJob.new("repo1")
     end
     
     it "should have a job group" do

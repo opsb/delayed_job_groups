@@ -40,6 +40,7 @@ Job groups are strings. You need to specify what the job_group should be in a bl
 ### Job groups for standard jobs ###
 
 	 class ResizeImageJob < Struct.new(:format)
+  	 include JobGroup	
 		 job_group{ |resize_image_job| resize_image_job.format }
 		
 		 def perform

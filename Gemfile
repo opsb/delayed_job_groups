@@ -8,5 +8,6 @@ group :test do
   gem 'sqlite3-ruby'  
   gem 'autotest'
   gem 'autotest-fsevent'
-  gem 'autotest-growl'  
+  gem 'autotest-growl'
+  gem 'ruby-debug'
 end
