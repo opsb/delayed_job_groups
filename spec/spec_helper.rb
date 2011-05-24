@@ -10,8 +10,22 @@ ENV['RAILS_ENV'] = 'test'
 require 'rails'
 
 require 'active_record'
-config = YAML.load(File.read('spec/database.yml'))
-ActiveRecord::Base.configurations = {'test' => config['sqlite']}
+
+if ENV['DATABASE_URL']
+  require 'uri'
+  uri = URI.parse(ENV['DATABASE_URL'])
+  ActiveRecord::Base.configurations = { 'test' => {
+    'adapter' => uri.scheme,
+    'database' => uri.path.gsub("/", ""),
+    'host' => uri.host,
+    'username' => uri.user,
+    'password' => uri.password
+  }}
+else
+  config = YAML.load(File.read('spec/database.yml'))
+  ActiveRecord::Base.configurations = {'test' => config['sqlite']}
+end
+
 ActiveRecord::Base.establish_connection
 ActiveRecord::Migration.verbose = false
 
