@@ -14,9 +14,14 @@ require 'active_record'
 if ENV['DATABASE_URL']
   require 'uri'
   uri = URI.parse(ENV['DATABASE_URL'])
+  adapter = case uri.scheme
+  when "sqlite" then "sqlite3"
+  when "postgres" then "postgresql"
+  else uri.scheme
+  end
   ActiveRecord::Base.configurations = { 'test' => {
-    'adapter' => uri.scheme,
-    'database' => uri.path.gsub("/", ""),
+    'adapter' => adapter,
+    'database' => uri.path[1..-1],
     'host' => uri.host,
     'username' => uri.user,
     'password' => uri.password
