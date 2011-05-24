@@ -10,8 +10,27 @@ ENV['RAILS_ENV'] = 'test'
 require 'rails'
 
 require 'active_record'
-config = YAML.load(File.read('spec/database.yml'))
-ActiveRecord::Base.configurations = {'test' => config['sqlite']}
+
+if ENV['DATABASE_URL']
+  require 'uri'
+  uri = URI.parse(ENV['DATABASE_URL'])
+  adapter = case uri.scheme
+  when "sqlite" then "sqlite3"
+  when "postgres" then "postgresql"
+  else uri.scheme
+  end
+  ActiveRecord::Base.configurations = { 'test' => {
+    'adapter' => adapter,
+    'database' => uri.path[1..-1],
+    'host' => uri.host,
+    'username' => uri.user,
+    'password' => uri.password
+  }}
+else
+  config = YAML.load(File.read('spec/database.yml'))
+  ActiveRecord::Base.configurations = {'test' => config['sqlite']}
+end
+
 ActiveRecord::Base.establish_connection
 ActiveRecord::Migration.verbose = false
 
